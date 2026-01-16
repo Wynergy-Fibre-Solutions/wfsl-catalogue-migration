@@ -1,0 +1,59 @@
+name: WFSL Crowd Verification
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  load-targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: build
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open("inventory/targets.json", "r", encoding="utf-8"))
+          targets = []
+          for group, repos in data.get("groups", {}).items():
+            for repo in repos:
+              targets.append({"group": group, "repo": repo})
+          print(f"matrix={{\"include\": {json.dumps(targets)} }}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+            f.write(f"matrix={json.dumps({'include': targets})}\n")
+          PY
+
+  verify:
+    needs: load-targets
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-targets.outputs.matrix) }}
+
+    steps:
+      - name: Download proof artefact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          repo: ${{ matrix.repo }}
+          workflow: verify-proof.yml
+          name: wfsl-proof
+          path: proof
+
+      - name: Checkout verifier only
+        uses: actions/checkout@v4
+        with:
+          repository: Wynergy-Fibre-Solutions/wfsl-eco-engine
+          path: verifier
+          sparse-checkout: |
+            release/wfsl-verify.ps1
+
+      - name: Verify proof
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass `
+            -File verifier\release\wfsl-verify.ps1 `
+            -ProofDir ".\proof" `
+            -RequireEvidence

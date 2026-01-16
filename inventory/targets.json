@@ -1,0 +1,10 @@
+{
+  "groups": {
+    "core": [
+      "Wynergy-Fibre-Solutions/wfsl-eco-engine"
+    ],
+    "verify": [
+      "Wynergy-Fibre-Solutions/wfsl-cross-verify"
+    ]
+  }
+}
