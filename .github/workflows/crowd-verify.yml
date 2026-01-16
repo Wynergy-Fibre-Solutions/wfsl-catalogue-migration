@@ -21,7 +21,6 @@ jobs:
           for group, repos in data.get("groups", {}).items():
             for repo in repos:
               targets.append({"group": group, "repo": repo})
-          print(f"matrix={{\"include\": {json.dumps(targets)} }}")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
             f.write(f"matrix={json.dumps({'include': targets})}\n")
           PY
@@ -34,6 +33,9 @@ jobs:
       matrix: ${{ fromJson(needs.load-targets.outputs.matrix) }}
 
     steps:
+      - name: Checkout ledger repo
+        uses: actions/checkout@v4
+
       - name: Download proof artefact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -57,3 +59,35 @@ jobs:
             -File verifier\release\wfsl-verify.ps1 `
             -ProofDir ".\proof" `
             -RequireEvidence
+
+      - name: Record attestation
+        if: always()
+        shell: pwsh
+        run: |
+          $result = if ($LASTEXITCODE -eq 0) { "PASS" } else { "FAIL" }
+          $ts = (Get-Date).ToUniversalTime().ToString("o")
+
+          $content = @{
+            target_repo     = "${{ matrix.repo }}"
+            verifier_repo   = "Wynergy-Fibre-Solutions/wfsl-catalogue-migration"
+            verifier_commit = "${{ github.sha }}"
+            result          = $result
+            timestamp_utc   = $ts
+          } | ConvertTo-Json -Depth 5
+
+          $name = "${{ matrix.repo }}".Replace("/", "_")
+          $path = "attestations/$name-$ts.json"
+
+          New-Item -ItemType Directory -Force -Path attestations | Out-Null
+          $content | Set-Content $path -Encoding UTF8
+
+      - name: Commit attestation
+        if: always()
+        shell: pwsh
+        run: |
+          git config user.name "wfsl-attestation-bot"
+          git config user.email "attestation@wfsl.systems"
+
+          git add attestations
+          git commit -m "attestation: ${{ matrix.repo }} @ ${{ github.run_id }}" || echo "Nothing to commit"
+          git push
