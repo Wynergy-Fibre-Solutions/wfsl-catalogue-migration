@@ -1,0 +1,5 @@
+
+attestations/*.json
+inventory/targets.local.json
+scripts/
+verification/THRESHOLD_POLICY.json
