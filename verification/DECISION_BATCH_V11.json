@@ -1,0 +1,13 @@
+{
+  "decision": "BATCH_TRANSFER_APPROVED",
+  "policy": "wfsl.crowd.threshold.v1",
+  "version": "v1.1",
+  "batch_id": "wfsl-migration-epoch-1",
+  "timestamp_utc": "2026-01-17T00:30:00Z",
+  "subjects": [
+    "wfsl-eco-engine"
+  ],
+  "minimum_attestations_per_subject": 2,
+  "attestation_source_dir": "attestations",
+  "notes": "Batch decision v1.1. Subjects are explicitly enumerated and hash-pinned."
+}
