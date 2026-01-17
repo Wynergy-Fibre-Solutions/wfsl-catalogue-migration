@@ -1,0 +1,10 @@
+{
+  "decision": "TRANSFER_APPROVED",
+  "policy": "wfsl.crowd.threshold.v1",
+  "subject": "wfsl-eco-engine",
+  "timestamp_utc": "2026-01-17T00:24:35Z",
+  "attestations": [
+    "wfsl-eco-engine-20260117T002205Z.json",
+    "wfsl-eco-engine-20260117T002435Z.json"
+  ]
+}
