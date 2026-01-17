@@ -16,13 +16,18 @@ jobs:
         run: |
           python - <<'PY'
           import json
-          data = json.load(open("inventory/targets.json", "r", encoding="utf-8"))
+          import os
+
+          with open("inventory/targets.json", "r", encoding="utf-8") as fh:
+              data = json.load(fh)
+
           targets = []
           for group, repos in data.get("groups", {}).items():
-            for repo in repos:
-              targets.append({"group": group, "repo": repo})
+              for repo in repos:
+                  targets.append({"group": group, "repo": repo})
+
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
-            f.write(f"matrix={json.dumps({'include': targets})}\n")
+              f.write(f"matrix={json.dumps({'include': targets})}\n")
           PY
 
   verify:
