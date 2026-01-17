@@ -1,0 +1,9 @@
+{
+  "schema": "wfsl.revocation.v1",
+  "subject": "wfsl-eco-engine",
+  "status": "REINSTATED",
+  "reason": "Initial revocation system bootstrap. Subject explicitly reinstated.",
+  "issued_by": "wfsl.crowd.governance",
+  "issued_at_utc": "2026-01-17T00:24:35Z",
+  "effective_at_utc": "2026-01-17T00:24:35Z"
+}
